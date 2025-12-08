@@ -1,18 +1,17 @@
-// app/screens/Splash.tsx - TANPA EXPO ROUTER
-import React, { useEffect } from "react";
+import { router } from "expo-router";
+import { useEffect } from "react";
 import { Dimensions, Image, StyleSheet, View } from "react-native";
 
 const { width } = Dimensions.get("window");
 
-export default function Splash({ navigation }) {
+export default function Splash() {
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Navigate ke Welcome
-      navigation.replace("Welcome");
+      router.replace("/screens/Welcome");
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [navigation]);
+  }, []);
 
   return (
     <View style={styles.container}>
