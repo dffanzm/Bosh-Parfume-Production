@@ -12,9 +12,8 @@ import {
 export default function Welcome() {
   return (
     <ImageBackground
-      source={{
-        uri: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9",
-      }}
+      source={require("../../assets/hero-perfume.jpg")
+      }
       style={styles.background}
     >
       <SafeAreaView style={styles.container}>
@@ -28,7 +27,7 @@ export default function Welcome() {
         {/* BUTTON */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.replace("/")} 
+          onPress={() => router.replace("/screens/HomePage")} 
         >
            <View style={styles.buttonContent}>
     <Text style={styles.buttonText}>GET STARTED TODAY</Text>
@@ -57,6 +56,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 48,
     fontWeight: "800",
+    fontFamily: "Poppins-Bold",
     color: "white",
     lineHeight: 58,
   },
@@ -79,6 +79,7 @@ buttonText: {
   color: "white",
   fontSize: 18,
   fontWeight: "600",
+  fontFamily: "Poppins-Regular",
 },
 
 arrow: {
