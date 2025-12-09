@@ -1,39 +1,60 @@
+// app/_layout.tsx
 import { useFonts } from "expo-font";
-import { Stack, usePathname } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 import { View } from "react-native";
-import Navbar from "./components/Navbar";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     "Poppins-Bold": require("../assets/Fonts/Poppins-Bold.ttf"),
     "Poppins-Regular": require("../assets/Fonts/Poppins-Regular.ttf"),
+    "Poppins-SemiBold": require("../assets/Fonts/Poppins-SemiBold.ttf"),
   });
 
-  const path = usePathname();
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
 
-  // halaman yang TIDAK boleh ada navbar
-  const hideNavbar = ["/screens/Splash", "/screens/Welcome"].includes(path);
-
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
 
   return (
     <View style={{ flex: 1 }}>
-      <StatusBar style="dark" />
-
       <Stack screenOptions={{ headerShown: false }}>
+        {/* Public screens */}
         <Stack.Screen name="index" />
-        <Stack.Screen name="screens/Splash" />
-        <Stack.Screen name="screens/Welcome" />
+        <Stack.Screen name="Splash" />
+        <Stack.Screen name="Welcome" />
 
-        {/* lu nanti tambahin ini */}
-        <Stack.Screen name="screens/HomePage" />
-        <Stack.Screen name="screens/Product" />
-        <Stack.Screen name="screens/Wishlist" />
+        {/* Screens dalam folder screens/ */}
+        <Stack.Screen
+          name="screens/HomePage"
+          options={{
+            animation: "slide_from_right",
+            gestureEnabled: true,
+          }}
+        />
+        <Stack.Screen
+          name="screens/Product"
+          options={{
+            animation: "slide_from_right",
+            gestureEnabled: true,
+          }}
+        />
+        <Stack.Screen
+          name="screens/Wishlist"
+          options={{
+            animation: "slide_from_right",
+            gestureEnabled: true,
+          }}
+        />
       </Stack>
-
-      {/* Navbar muncul HANYA di halaman tertentu */}
-      {!hideNavbar && <Navbar />}
     </View>
   );
 }
