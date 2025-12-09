@@ -1,43 +1,52 @@
-// components/Navbar.tsx - LEAN & TIGHT PRECISION
 import { usePathname, useRouter } from "expo-router";
 import { Handbag, Heart, House } from "lucide-react-native";
-import React, { useMemo } from "react";
-import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useMemo, useRef } from "react";
+import {
+  Animated,
+  Dimensions,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const TOTAL_NAVBAR_WIDTH = SCREEN_WIDTH * 0.72; // Lebih ramping
-const ICON_TOUCH_SIZE = 44; // Reduced from 48
-const AVAILABLE_SPACE = TOTAL_NAVBAR_WIDTH - ICON_TOUCH_SIZE * 3;
-const SPACING_BETWEEN_ICONS = AVAILABLE_SPACE / 4;
+
+type NavItem = {
+  id: number;
+  path: string;
+  icon: React.ComponentType<any>;
+  activeColor: string;
+  inactiveColor: string;
+};
 
 export default function Navbar() {
   const router = useRouter();
   const path = usePathname();
   const insets = useSafeAreaInsets();
 
-  const navItems = useMemo(
+  const navItems: NavItem[] = useMemo(
     () => [
       {
         id: 1,
         path: "/screens/HomePage",
         icon: House,
         activeColor: "#000000",
-        iconSize: { active: 23, inactive: 20 },
+        inactiveColor: "#8E8E93",
       },
       {
         id: 2,
         path: "/screens/Product",
         icon: Handbag,
         activeColor: "#000000",
-        iconSize: { active: 23, inactive: 20 },
+        inactiveColor: "#8E8E93",
       },
       {
         id: 3,
         path: "/screens/Wishlist",
         icon: Heart,
         activeColor: "#FF375F",
-        iconSize: { active: 23, inactive: 20 },
+        inactiveColor: "#8E8E93",
       },
     ],
     []
@@ -45,47 +54,106 @@ export default function Navbar() {
 
   const isActive = (itemPath: string) => path === itemPath;
 
+  // Animations
+  const scaleAnimations = useRef(
+    navItems.map(() => new Animated.Value(1))
+  ).current;
+
+  const translateAnimations = useRef(
+    navItems.map(() => new Animated.Value(0))
+  ).current;
+
+  const handlePress = (itemPath: string) => {
+    if (isActive(itemPath)) return;
+
+    // reset anim
+    navItems.forEach((_, i) => {
+      Animated.spring(scaleAnimations[i], {
+        toValue: 1,
+        tension: 180,
+        friction: 12,
+        useNativeDriver: true,
+      }).start();
+
+      Animated.spring(translateAnimations[i], {
+        toValue: 0,
+        tension: 180,
+        friction: 12,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    router.push(itemPath);
+  };
+
+  React.useEffect(() => {
+    navItems.forEach((item, index) => {
+      const active = isActive(item.path);
+
+      Animated.spring(scaleAnimations[index], {
+        toValue: active ? 1.04 : 1,
+        tension: 200,
+        friction: 16,
+        useNativeDriver: true,
+      }).start();
+
+      Animated.spring(translateAnimations[index], {
+        toValue: active ? -2 : 0,
+        tension: 200,
+        friction: 17,
+        useNativeDriver: true,
+      }).start();
+    });
+  }, [path]);
+
+  const availableSpace = SCREEN_WIDTH * 0.72 - 44 * 3;
+  const spacingBetweenIcons = availableSpace / 4;
+
   return (
     <View
       style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 16) }]}
     >
-      {/* LEAN & TIGHT NAVBAR */}
-      <View style={[styles.leanBar, { width: TOTAL_NAVBAR_WIDTH }]}>
-        {/* START SPACER */}
-        <View style={{ width: SPACING_BETWEEN_ICONS }} />
+      <View style={[styles.bar, { width: SCREEN_WIDTH * 0.72 }]}>
+        <View style={{ width: spacingBetweenIcons }} />
 
         {navItems.map((item, index) => {
           const active = isActive(item.path);
           const Icon = item.icon;
 
+          const scaleAnim = scaleAnimations[index];
+          const translateAnim = translateAnimations[index];
+
           return (
             <React.Fragment key={item.id}>
               <TouchableOpacity
-                style={styles.leanTouch}
-                onPress={() => !active && router.push(item.path)}
-                activeOpacity={0.5}
-                hitSlop={{ top: 8, bottom: 8, left: 12, right: 12 }}
+                style={styles.touch}
+                onPress={() => handlePress(item.path)}
+                activeOpacity={0.6}
               >
-                <Icon
-                  size={active ? item.iconSize.active : item.iconSize.inactive}
-                  color={active ? item.activeColor : "#8E8E93"}
-                  strokeWidth={active ? 2.2 : 1.8}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill={active && item.id === 3 ? item.activeColor : "none"}
-                />
+                <Animated.View
+                  style={{
+                    transform: [
+                      { scale: scaleAnim },
+                      { translateY: translateAnim },
+                    ],
+                  }}
+                >
+                  <Icon
+                    size={active ? 27 : 23}
+                    color={active ? item.activeColor : item.inactiveColor}
+                    strokeWidth={active ? 2.5 : 1.8}
+                  />
+                </Animated.View>
               </TouchableOpacity>
 
-              {/* SPACER BETWEEN ICONS */}
               {index < navItems.length - 1 && (
-                <View style={{ width: SPACING_BETWEEN_ICONS }} />
+                <View style={{ width: spacingBetweenIcons }} />
               )}
             </React.Fragment>
           );
         })}
 
-        {/* END SPACER */}
-        <View style={{ width: SPACING_BETWEEN_ICONS }} />
+        <View style={{ width: spacingBetweenIcons }} />
       </View>
     </View>
   );
@@ -98,31 +166,29 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: "center",
-    zIndex: 1000,
+    zIndex: 999,
   },
-  leanBar: {
+  bar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
-    borderRadius: 20, // Slightly smaller radius
-    paddingVertical: 12, // TIGHT! Reduced from 16
-    height: 56, // TOTAL HEIGHT: 12 + 44 + 12 = 68? Wait, let me fix
+    borderRadius: 20,
+    paddingVertical: 14,
+    height: 58,
 
-    // CRISP & LIGHT SHADOW
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 4,
 
-    // THIN BORDER
     borderWidth: 0.5,
-    borderColor: "rgba(0, 0, 0, 0.05)",
+    borderColor: "rgba(0,0,0,0.05)",
   },
-  leanTouch: {
-    width: ICON_TOUCH_SIZE,
-    height: ICON_TOUCH_SIZE,
+  touch: {
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
   },
