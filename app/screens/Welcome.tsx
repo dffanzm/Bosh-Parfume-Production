@@ -12,8 +12,7 @@ import {
 export default function Welcome() {
   return (
     <ImageBackground
-      source={require("../../assets/hero-perfume.jpg")
-      }
+      source={require("../../assets/hero-perfume.jpg")}
       style={styles.background}
     >
       <SafeAreaView style={styles.container}>
@@ -27,12 +26,12 @@ export default function Welcome() {
         {/* BUTTON */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.replace("/screens/HomePage")} 
+          onPress={() => router.replace("/screens/HomePage")}
         >
-           <View style={styles.buttonContent}>
-    <Text style={styles.buttonText}>GET STARTED TODAY</Text>
-    <Text style={styles.arrow}>→</Text>
-  </View>
+          <View style={styles.buttonContent}>
+            <Text style={styles.buttonText}>GET STARTED TODAY</Text>
+            <Text style={styles.arrow}>→</Text>
+          </View>
         </TouchableOpacity>
       </SafeAreaView>
     </ImageBackground>
@@ -61,31 +60,30 @@ const styles = StyleSheet.create({
     lineHeight: 58,
   },
   button: {
-  borderWidth: 2,
-  borderColor: "white",
-  paddingVertical: 15,
-  borderRadius: 50,
-  paddingHorizontal: 20,
-},
+    borderWidth: 2,
+    borderColor: "white",
+    paddingVertical: 15,
+    borderRadius: 50,
+    paddingHorizontal: 20,
+  },
 
-buttonContent: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  width: "100%",
-},
+  buttonContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+  },
 
-buttonText: {
-  color: "white",
-  fontSize: 18,
-  fontWeight: "600",
-  fontFamily: "Poppins-Regular",
-},
+  buttonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "600",
+    fontFamily: "Poppins-Regular",
+  },
 
-arrow: {
-  color: "white",
-  fontSize: 22,
-  fontWeight: "600",
-},
-
+  arrow: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "600",
+  },
 });

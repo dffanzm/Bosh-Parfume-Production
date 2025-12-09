@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
 
-export default function HomePage() {
+export default function Wishlist() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Home Page</Text>
+      <Text style={styles.text}>Wishlist Page</Text>
     </View>
   );
 }
