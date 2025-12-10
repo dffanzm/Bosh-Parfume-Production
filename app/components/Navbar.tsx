@@ -83,7 +83,7 @@ export default function Navbar() {
       }).start();
     });
 
-    router.push(itemPath);
+    router.push(itemPath as any);
   };
 
   React.useEffect(() => {
