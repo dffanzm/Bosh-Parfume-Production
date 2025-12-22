@@ -3,15 +3,15 @@ import { create } from "zustand";
 export const useWishlist = create((set) => ({
   items: [],
 
-  addToWishlist: (product) =>
-    set((state) => {
+  addToWishlist: (product: any) =>
+    set((state: any) => {
       // Cegah duplikat
-      if (state.items.some((i) => i.id === product.id)) return state;
+      if (state.items.some((i: any) => i.id === product.id)) return state;
       return { items: [...state.items, product] };
     }),
 
-  removeFromWishlist: (id) =>
-    set((state) => ({
-      items: state.items.filter((item) => item.id !== id),
+  removeFromWishlist: (id: any) =>
+    set((state: any) => ({
+      items: state.items.filter((item: any) => item.id !== id),
     })),
 }));

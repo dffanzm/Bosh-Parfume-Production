@@ -1,17 +1,19 @@
 import { useLocalSearchParams } from "expo-router";
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function DetailProduct() {
   // ambil data dari param (gambar, nama, harga, dll)
   const params = useLocalSearchParams();
-  const product = JSON.parse(params.data);
+  const product = JSON.parse(
+    typeof params.data === "string" ? params.data : "{}"
+  );
 
   return (
     <ScrollView style={styles.container}>

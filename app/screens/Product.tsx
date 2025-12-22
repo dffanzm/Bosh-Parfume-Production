@@ -74,9 +74,9 @@ import { useWishlist } from "../store/useWishlist";
 export default function Product() {
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const wishlist = useWishlist((state) => state.items);
-  const addWishlist = useWishlist((state) => state.addToWishlist);
-  const removeWishlist = useWishlist((state) => state.removeFromWishlist);
+  const wishlist = useWishlist((state: any) => state.items);
+  const addWishlist = useWishlist((state: any) => state.addToWishlist);
+  const removeWishlist = useWishlist((state: any) => state.removeFromWishlist);
 
   const filteredProducts =
     activeFilter === "all"
@@ -158,7 +158,7 @@ export default function Product() {
       <View style={styles.grid}>
         {filteredProducts.map((item) => {
           // CEK APAKAH SUDAH ADA DI WISHLIST
-          const isFavorited = wishlist.some((w) => w.id === item.id);
+          const isFavorited = wishlist.some((w: any) => w.id === item.id);
 
           return (
             <TouchableOpacity

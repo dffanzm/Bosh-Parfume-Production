@@ -1,10 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useWishlist } from "../store/useWishlist";
 
 export default function Wishlist() {
-  const items = useWishlist((state) => state.items);
-  const removeFromWishlist = useWishlist((state) => state.removeFromWishlist);
+  const items = useWishlist((state: any) => state.items);
+  const removeFromWishlist = useWishlist(
+    (state: any) => state.removeFromWishlist
+  );
 
   return (
     <ScrollView style={styles.container}>
@@ -13,7 +22,7 @@ export default function Wishlist() {
       {items.length === 0 ? (
         <Text style={styles.emptyText}>Wishlist kamu masih kosong 😢</Text>
       ) : (
-        items.map((item) => (
+        items.map((item: any) => (
           <View key={item.id} style={styles.card}>
             <Image source={{ uri: item.image }} style={styles.image} />
 
@@ -37,7 +46,11 @@ export default function Wishlist() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff" },
   title: { fontSize: 20, fontFamily: "Poppins-SemiBold", marginBottom: 20 },
-  emptyText: { fontFamily: "Poppins-Regular", textAlign: "center", marginTop: 40 },
+  emptyText: {
+    fontFamily: "Poppins-Regular",
+    textAlign: "center",
+    marginTop: 40,
+  },
   card: {
     flexDirection: "row",
     padding: 12,
