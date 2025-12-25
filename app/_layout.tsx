@@ -26,13 +26,19 @@ export default function RootLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }}>
-        {/* Public screens */}
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "fade",          // smooth transition ✨
+          animationDuration: 350,     // feel cinematic
+        }}
+      >
+        {/* === PUBLIC / INTRO FLOW === */}
         <Stack.Screen name="index" />
         <Stack.Screen name="Splash" />
         <Stack.Screen name="Welcome" />
 
-        {/* Screens dalam folder screens/ */}
+        {/* === MAIN APP SCREENS (tetap slide biar kerasa navigasi) === */}
         <Stack.Screen
           name="screens/HomePage"
           options={{

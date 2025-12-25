@@ -24,7 +24,7 @@ export default function Wishlist() {
       ) : (
         items.map((item: any) => (
           <View key={item.id} style={styles.card}>
-            <Image source={{ uri: item.image }} style={styles.image} />
+            <Image source={item.image} style={styles.image} />
 
             <View style={{ flex: 1 }}>
               <Text style={styles.name}>{item.name}</Text>
