@@ -18,16 +18,16 @@ const PRODUCTS = [
     rating: 4.5,
     tag: "new",
     image:
-      "https://images.unsplash.com/photo-1592945403244-22ab5f437f89?auto=format&fit=crop&w=600&q=60",
+      require("../../assets/vc-so-sexy.png"),
   },
   {
     id: 2,
-    name: "EIGNER BLUE",
+    name: "BULGARI AQUA",
     price: "Rp 60.000",
     rating: 4.5,
     tag: "best",
     image:
-      "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=60",
+      require("../../assets/bulgari-aqua.png"),
   },
   {
     id: 3,
@@ -36,16 +36,16 @@ const PRODUCTS = [
     rating: 4.5,
     tag: "all",
     image:
-      "https://images.unsplash.com/photo-1585386959984-a4155224a1f5?auto=format&fit=crop&w=600&q=60",
+      require("../../assets/jlo-still.png"),
   },
   {
     id: 4,
-    name: "CR7 BOSH",
+    name: "BUBBLE GUM",
     price: "Rp 60.000",
     rating: 4.5,
     tag: "new",
     image:
-      "https://images.unsplash.com/photo-1536510348842-6cae3b3a37c5?auto=format&fit=crop&w=600&q=60",
+      require("../../assets/bubble-gum.png"),
   },
   {
     id: 5,
@@ -54,7 +54,7 @@ const PRODUCTS = [
     rating: 4.5,
     tag: "best",
     image:
-      "https://images.unsplash.com/photo-1579033461380-adb47c3eb938?auto=format&fit=crop&w=600&q=60",
+      require("../../assets/blue-emotion.png"),
   },
   {
     id: 6,
@@ -63,7 +63,7 @@ const PRODUCTS = [
     rating: 4.5,
     tag: "best",
     image:
-      "https://images.unsplash.com/photo-1600180758890-6b94519a1f1e?auto=format&fit=crop&w=600&q=60",
+      require("../../assets/vanilla.png"),
   },
 ];
 
@@ -171,7 +171,7 @@ export default function Product() {
                 })
               }
             >
-              <Image source={{ uri: item.image }} style={styles.productImage} />
+              <Image source={item.image} style={styles.productImage} />
 
               {/* LOVE ICON */}
               <TouchableOpacity

@@ -18,7 +18,7 @@ export default function DetailProduct() {
   return (
     <ScrollView style={styles.container}>
       {/* HEADER IMAGE */}
-      <Image source={{ uri: product.image }} style={styles.banner} />
+      <Image source={product.image} style={styles.banner} />
 
       {/* CONTENT */}
       <View style={styles.content}>
