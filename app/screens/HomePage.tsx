@@ -37,9 +37,7 @@ export default function HomePage() {
   useEffect(() => {
     const interval = setInterval(() => {
       const nextIndex =
-        activeBanner === banners.length - 1
-          ? 0
-          : activeBanner + 1;
+        activeBanner === banners.length - 1 ? 0 : activeBanner + 1;
 
       bannerRef.current?.scrollToIndex({
         index: nextIndex,
@@ -73,9 +71,7 @@ export default function HomePage() {
           );
           setActiveBanner(index);
         }}
-        renderItem={({ item }) => (
-          <Image source={item} style={styles.hero} />
-        )}
+        renderItem={({ item }) => <Image source={item} style={styles.hero} />}
       />
 
       {/* ---------------- DOT INDICATOR ---------------- */}
@@ -83,10 +79,7 @@ export default function HomePage() {
         {banners.map((_, i) => (
           <View
             key={i}
-            style={[
-              styles.dot,
-              { opacity: i === activeBanner ? 1 : 0.25 },
-            ]}
+            style={[styles.dot, { opacity: i === activeBanner ? 1 : 0.25 }]}
           />
         ))}
       </View>
@@ -105,9 +98,7 @@ export default function HomePage() {
           <TouchableOpacity
             style={styles.card}
             activeOpacity={0.9}
-            onPress={() =>
-              router.push(`/screens/Product?id=${item.id}`)
-            }
+            onPress={() => router.push(`/screens/Product?id=${item.id}`)}
           >
             <Image source={item.image} style={styles.cardImage} />
           </TouchableOpacity>
