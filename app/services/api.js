@@ -27,7 +27,7 @@ export const apiService = {
     }
   },
 
-  // 3. GET PRODUCTS BY TAG (Sekarang udah bisa jalan!)
+  // 3. GET PRODUCTS BY TAG
   getProductsByTag: async (tag) => {
     try {
       // Kalau tag 'all', panggil getProducts biasa

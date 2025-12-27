@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { formatCurrency } from "../utils/currency";
 
 export default function DetailProduct() {
   // ambil data dari param (gambar, nama, harga, dll)
@@ -17,13 +18,15 @@ export default function DetailProduct() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* HEADER IMAGE */}
-      <Image source={product.image} style={styles.banner} />
+      {/* HEADER IMAGE - Pake URI */}
+      <Image source={{ uri: product.image_url }} style={styles.banner} />
 
       {/* CONTENT */}
       <View style={styles.content}>
         <Text style={styles.name}>{product.name} - BOSH PARFUME</Text>
-        <Text style={styles.price}>{product.price}</Text>
+        
+        {/* PRICE - Pake Format Currency */}
+        <Text style={styles.price}>{formatCurrency(product.price)}</Text>
 
         {/* SIZE */}
         <Text style={styles.sectionTitle}>Size</Text>
@@ -31,12 +34,10 @@ export default function DetailProduct() {
           <Text style={styles.sizeText}>30 ml</Text>
         </TouchableOpacity>
 
-        {/* DESCRIPTION */}
+        {/* DESCRIPTION - Handle kalau kosong */}
         <Text style={styles.sectionTitle}>Description</Text>
         <Text style={styles.description}>
-          Parfum dengan aroma gourmand yang hangat, creamy, dan manis lembut.
-          Wangi ini memberi kesan menenangkan dan elegan tanpa terasa
-          berlebihan.
+          {product.description || "Parfum dengan aroma gourmand yang hangat, creamy, dan manis lembut."}
         </Text>
 
         {/* FRAGRANCE NOTES */}

@@ -1,6 +1,8 @@
-// app/screens/Product.tsx
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -9,79 +11,37 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-const PRODUCTS = [
-  {
-    id: 1,
-    name: "VC. SO SEXY",
-    price: "Rp 60.000",
-    rating: 4.5,
-    tag: "new",
-    image:
-      require("../../assets/vc-so-sexy.png"),
-  },
-  {
-    id: 2,
-    name: "BULGARI AQUA",
-    price: "Rp 60.000",
-    rating: 4.5,
-    tag: "best",
-    image:
-      require("../../assets/bulgari-aqua.png"),
-  },
-  {
-    id: 3,
-    name: "JLO STILL",
-    price: "Rp 60.000",
-    rating: 4.5,
-    tag: "all",
-    image:
-      require("../../assets/jlo-still.png"),
-  },
-  {
-    id: 4,
-    name: "BUBBLE GUM",
-    price: "Rp 60.000",
-    rating: 4.5,
-    tag: "new",
-    image:
-      require("../../assets/bubble-gum.png"),
-  },
-  {
-    id: 5,
-    name: "BLUE EMOTION",
-    price: "Rp 60.000",
-    rating: 4.5,
-    tag: "best",
-    image:
-      require("../../assets/blue-emotion.png"),
-  },
-  {
-    id: 6,
-    name: "VANILLA",
-    price: "Rp 60.000",
-    rating: 4.5,
-    tag: "best",
-    image:
-      require("../../assets/vanilla.png"),
-  },
-];
-
-import { router } from "expo-router";
-import { useState } from "react";
+import { apiService } from "../services/api";
 import { useWishlist } from "../store/useWishlist";
+import { formatCurrency } from "../utils/currency";
 
 export default function Product() {
   const [activeFilter, setActiveFilter] = useState("all");
+
+  // STATE DATA API
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const wishlist = useWishlist((state: any) => state.items);
   const addWishlist = useWishlist((state: any) => state.addToWishlist);
   const removeWishlist = useWishlist((state: any) => state.removeFromWishlist);
 
-  const filteredProducts =
-    activeFilter === "all"
-      ? PRODUCTS
-      : PRODUCTS.filter((item) => item.tag === activeFilter);
+  // LOGIC FILTER via API
+  useEffect(() => {
+    const fetchFilteredProducts = async () => {
+      setLoading(true);
+      try {
+        const data = await apiService.getProductsByTag(activeFilter);
+        setProducts(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFilteredProducts();
+  }, [activeFilter]);
 
   return (
     <ScrollView style={styles.container}>
@@ -102,117 +62,90 @@ export default function Product() {
 
       {/* FILTER BUTTON */}
       <View style={styles.filterRow}>
-        <TouchableOpacity
-          style={
-            activeFilter === "all" ? styles.filterActive : styles.filterButton
-          }
-          onPress={() => setActiveFilter("all")}
-        >
-          <Text
+        {["all", "new", "best"].map((filter) => (
+          <TouchableOpacity
+            key={filter}
             style={
-              activeFilter === "all"
-                ? styles.filterActiveText
-                : styles.filterText
+              activeFilter === filter ? styles.filterActive : styles.filterButton
             }
+            onPress={() => setActiveFilter(filter)}
           >
-            All
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={
-            activeFilter === "new" ? styles.filterActive : styles.filterButton
-          }
-          onPress={() => setActiveFilter("new")}
-        >
-          <Text
-            style={
-              activeFilter === "new"
-                ? styles.filterActiveText
-                : styles.filterText
-            }
-          >
-            New
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={
-            activeFilter === "best" ? styles.filterActive : styles.filterButton
-          }
-          onPress={() => setActiveFilter("best")}
-        >
-          <Text
-            style={
-              activeFilter === "best"
-                ? styles.filterActiveText
-                : styles.filterText
-            }
-          >
-            Best Seller
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={
+                activeFilter === filter
+                  ? styles.filterActiveText
+                  : styles.filterText
+              }
+            >
+              {filter === "all" ? "All" : filter === "new" ? "New" : "Best Seller"}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       {/* PRODUCT GRID */}
-      <View style={styles.grid}>
-        {filteredProducts.map((item) => {
-          // CEK APAKAH SUDAH ADA DI WISHLIST
-          const isFavorited = wishlist.some((w: any) => w.id === item.id);
+      {loading ? (
+        <ActivityIndicator size="large" color="#000" style={{ marginTop: 50 }} />
+      ) : (
+        <View style={styles.grid}>
+          {products.map((item) => {
+            const isFavorited = wishlist.some((w: any) => w.id === item.id);
 
-          return (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.card}
-              onPress={() =>
-                router.push({
-                  pathname: "/screens/DetailProduct",
-                  params: { data: JSON.stringify(item) },
-                })
-              }
-            >
-              <Image source={item.image} style={styles.productImage} />
-
-              {/* LOVE ICON */}
+            return (
               <TouchableOpacity
-                style={styles.loveBtn}
+                key={item.id}
+                style={styles.card}
                 onPress={() =>
-                  isFavorited ? removeWishlist(item.id) : addWishlist(item)
+                  router.push({
+                    pathname: "/screens/DetailProduct",
+                    params: { data: JSON.stringify(item) },
+                  })
                 }
               >
-                <Ionicons
-                  name={isFavorited ? "heart" : "heart-outline"}
-                  size={22}
-                  color={isFavorited ? "#e63946" : "#555"}
-                />
+                {/* PAKE URI KARENA DARI INTERNET */}
+                <Image source={{ uri: item.image_url }} style={styles.productImage} />
+
+                {/* LOVE ICON */}
+                <TouchableOpacity
+                  style={styles.loveBtn}
+                  onPress={() =>
+                    isFavorited ? removeWishlist(item.id) : addWishlist(item)
+                  }
+                >
+                  <Ionicons
+                    name={isFavorited ? "heart" : "heart-outline"}
+                    size={22}
+                    color={isFavorited ? "#e63946" : "#555"}
+                  />
+                </TouchableOpacity>
+
+                {/* NAME */}
+                <Text style={styles.productName}>{item.name}</Text>
+
+                {/* PRICE (FORMATTED) */}
+                <Text style={styles.price}>{formatCurrency(item.price)}</Text>
+
+                {/* RATING */}
+                <View style={styles.ratingRow}>
+                  <Ionicons name="star" size={16} color="#f4a261" />
+                  <Text style={styles.ratingText}>{item.rating}</Text>
+                </View>
+
+                {/* BUTTONS */}
+                <View style={styles.cardFooter}>
+                  <TouchableOpacity style={styles.buyNowBtn}>
+                    <Text style={styles.buyNowText}>BUY NOW</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity>
+                    <Ionicons name="cart-outline" size={24} color="#222" />
+                  </TouchableOpacity>
+                </View>
               </TouchableOpacity>
-
-              {/* NAME */}
-              <Text style={styles.productName}>{item.name}</Text>
-
-              {/* PRICE */}
-              <Text style={styles.price}>{item.price}</Text>
-
-              {/* RATING */}
-              <View style={styles.ratingRow}>
-                <Ionicons name="star" size={16} color="#f4a261" />
-                <Text style={styles.ratingText}>{item.rating}</Text>
-              </View>
-
-              {/* BUTTONS */}
-              <View style={styles.cardFooter}>
-                <TouchableOpacity style={styles.buyNowBtn}>
-                  <Text style={styles.buyNowText}>BUY NOW</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity>
-                  <Ionicons name="cart-outline" size={24} color="#222" />
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+            );
+          })}
+        </View>
+      )}
 
       {/* BOTTOM SPACING */}
       <View style={{ height: 80 }} />

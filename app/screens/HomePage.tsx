@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { apiService } from "../services/api";
 
 const { width } = Dimensions.get("window");
 const BANNER_WIDTH = width - 40;
@@ -18,23 +20,35 @@ export default function HomePage() {
   const bannerRef = useRef<FlatList>(null);
   const [activeBanner, setActiveBanner] = useState(0);
 
-  /* ---------- BANNER DATA ---------- */
-  const banners = [
-    require("../../assets/banner-1.png"),
-    require("../../assets/banner-2.png"),
-    require("../../assets/banner-3.png"),
-  ];
+  // STATE DATA API
+  const [banners, setBanners] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  /* ---------- PRODUCT DATA ---------- */
-  const products = [
-    { id: "1", image: require("../../assets/bubble-gum.png") },
-    { id: "2", image: require("../../assets/jlo-still.png") },
-    { id: "3", image: require("../../assets/bulgari-aqua.png") },
-    { id: "4", image: require("../../assets/vc-so-sexy.png") },
-  ];
+  // FETCH DATA
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [bannerData, productData] = await Promise.all([
+          apiService.getBanners(),
+          apiService.getProducts(),
+        ]);
+        setBanners(bannerData);
+        setProducts(productData);
+      } catch (error) {
+        console.error("Gagal load home:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   /* ---------- AUTOPLAY ---------- */
   useEffect(() => {
+    if (banners.length === 0) return;
+
     const interval = setInterval(() => {
       const nextIndex =
         activeBanner === banners.length - 1 ? 0 : activeBanner + 1;
@@ -48,7 +62,16 @@ export default function HomePage() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [activeBanner]);
+  }, [activeBanner, banners]);
+
+  // LOADING VIEW
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#000" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -59,7 +82,7 @@ export default function HomePage() {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        keyExtractor={(_, index) => index.toString()}
+        keyExtractor={(item) => item.id.toString()}
         getItemLayout={(_, index) => ({
           length: BANNER_WIDTH,
           offset: BANNER_WIDTH * index,
@@ -71,7 +94,10 @@ export default function HomePage() {
           );
           setActiveBanner(index);
         }}
-        renderItem={({ item }) => <Image source={item} style={styles.hero} />}
+        renderItem={({ item }) => (
+          // PAKE URI KARENA DARI INTERNET
+          <Image source={{ uri: item.image_url }} style={styles.hero} />
+        )}
       />
 
       {/* ---------------- DOT INDICATOR ---------------- */}
@@ -89,24 +115,31 @@ export default function HomePage() {
 
       {/* ================= PRODUCT GRID ================= */}
       <FlatList
-        data={products}
+        data={products.slice(0, 4)} // Ambil 4 teratas aja
         numColumns={2}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         columnWrapperStyle={{ justifyContent: "space-between" }}
         contentContainerStyle={{ paddingBottom: 40 }}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
             activeOpacity={0.9}
-            onPress={() => router.push(`/screens/Product?id=${item.id}`)}
+            onPress={() =>
+              router.push({
+                pathname: "/screens/DetailProduct",
+                params: { data: JSON.stringify(item) },
+              })
+            }
           >
-            <Image source={item.image} style={styles.cardImage} />
+            {/* PAKE URI KARENA DARI INTERNET */}
+            <Image source={{ uri: item.image_url }} style={styles.cardImage} />
           </TouchableOpacity>
         )}
       />
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
