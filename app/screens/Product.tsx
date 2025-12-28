@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Dimensions,
   Image,
   Linking,
   ScrollView,
@@ -16,13 +17,15 @@ import { apiService } from "../services/api";
 import { useWishlist } from "../store/useWishlist";
 import { formatCurrency } from "../utils/currency";
 
+const { width } = Dimensions.get("window");
+// Card width: (Layar - Padding 20x2 - Gap 15) / 2
+const cardWidth = (width - 40 - 15) / 2;
+
 export default function Product() {
   const [activeFilter, setActiveFilter] = useState("all");
-
-  // STATE DATA
-  const [allProducts, setAllProducts] = useState<any[]>([]); // Data mentah dari API
-  const [displayedProducts, setDisplayedProducts] = useState<any[]>([]); // Data yang tampil di layar (hasil filter)
-  const [searchQuery, setSearchQuery] = useState(""); // Text search user
+  const [allProducts, setAllProducts] = useState<any[]>([]);
+  const [displayedProducts, setDisplayedProducts] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
   const wishlist = useWishlist((state: any) => state.items);
@@ -32,22 +35,19 @@ export default function Product() {
   const WHATSAPP_NUMBER = "6282125902548";
 
   const handleBuyNow = (productName: string) => {
-    const message = `Halo Admin Bosh Parfume, saya mau pesan *${productName}*, apakah stok ready?`;
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-      message
-    )}`;
-    Linking.openURL(url).catch((err) => console.error("Err WA", err));
+    const message = `Halo Admin Bosh Parfume, saya mau pesan *${productName}*`;
+    Linking.openURL(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+    );
   };
 
-  // 1. FETCH DATA (Cuma sekali pas ganti Filter Kategori)
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const data = await apiService.getProductsByTag(activeFilter);
         setAllProducts(data);
-        setDisplayedProducts(data); // Awal-awal tampilin semua
-        setSearchQuery(""); // Reset search pas ganti kategori
+        setDisplayedProducts(data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -57,268 +57,272 @@ export default function Product() {
     fetchData();
   }, [activeFilter]);
 
-  // 2. LOGIC SEARCH (Realtime Search by Name & Notes)
   const handleSearch = (text: string) => {
     setSearchQuery(text);
-
     if (text.trim() === "") {
-      setDisplayedProducts(allProducts); // Kalau kosong, balikin semua
+      setDisplayedProducts(allProducts);
       return;
     }
-
     const lowerText = text.toLowerCase();
-
-    // FILTER SAKTI: Cari di Nama, Top Note, Middle Note, atau Base Note
     const filtered = allProducts.filter((item) => {
-      const matchName = item.name.toLowerCase().includes(lowerText);
-      const matchTop = item.top_note?.toLowerCase().includes(lowerText);
-      const matchMid = item.middle_note?.toLowerCase().includes(lowerText);
-      const matchBase = item.base_note?.toLowerCase().includes(lowerText);
-
-      return matchName || matchTop || matchMid || matchBase;
+      return (
+        item.name.toLowerCase().includes(lowerText) ||
+        item.top_note?.toLowerCase().includes(lowerText)
+      );
     });
-
     setDisplayedProducts(filtered);
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* SEARCH BAR (Sekarang udah fungsi!) */}
-      <View style={styles.searchWrapper}>
-        <Ionicons
-          name="search"
-          size={20}
-          color="#888"
-          style={{ marginRight: 6 }}
-        />
-        <TextInput
-          placeholder="Find your parfume..."
-          placeholderTextColor="#aaa"
-          style={styles.searchInput}
-          value={searchQuery}
-          onChangeText={handleSearch}
-        />
-        {/* Tombol Clear Search (Muncul kalau ada teks) */}
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => handleSearch("")}>
-            <Ionicons name="close-circle" size={18} color="#ccc" />
-          </TouchableOpacity>
-        )}
-      </View>
+    <View style={styles.mainContainer}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 100,
+          paddingHorizontal: 20,
+          paddingTop: 10,
+        }}
+      >
+        {/* SEARCH BAR (Clean Style) */}
+        <View style={styles.searchWrapper}>
+          <Ionicons
+            name="search-outline"
+            size={20}
+            color="#666"
+            style={{ marginRight: 8 }}
+          />
+          <TextInput
+            placeholder="Search collection..."
+            placeholderTextColor="#999"
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
+        </View>
 
-      {/* FILTER BUTTON */}
-      <View style={styles.filterRow}>
-        {["all", "new", "best"].map((filter) => (
-          <TouchableOpacity
-            key={filter}
-            style={
-              activeFilter === filter
-                ? styles.filterActive
-                : styles.filterButton
-            }
-            onPress={() => setActiveFilter(filter)}
-          >
-            <Text
-              style={
-                activeFilter === filter
-                  ? styles.filterActiveText
-                  : styles.filterText
-              }
-            >
-              {filter === "all"
-                ? "All"
-                : filter === "new"
-                ? "New"
-                : "Best Seller"}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* PRODUCT GRID */}
-      {loading ? (
-        <ActivityIndicator
-          size="large"
-          color="#000"
-          style={{ marginTop: 50 }}
-        />
-      ) : (
-        <View style={styles.grid}>
-          {/* Kalau hasil pencarian 0 */}
-          {displayedProducts.length === 0 && (
-            <View
-              style={{ width: "100%", alignItems: "center", marginTop: 20 }}
-            >
-              <Text style={{ color: "#888", fontFamily: "Poppins-Regular" }}>
-                Produk tidak ditemukan :(
-              </Text>
-            </View>
-          )}
-
-          {displayedProducts.map((item) => {
-            const isFavorited = wishlist.some((w: any) => w.id === item.id);
-
-            return (
+        {/* FILTER TAGS */}
+        <View style={styles.filterContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {["all", "new", "best"].map((filter) => (
               <TouchableOpacity
-                key={item.id}
-                style={styles.card}
-                onPress={() =>
-                  router.push({
-                    pathname: "/screens/DetailProduct",
-                    params: { data: JSON.stringify(item) },
-                  })
-                }
+                key={filter}
+                style={[
+                  styles.filterButton,
+                  activeFilter === filter && styles.filterActive,
+                ]}
+                onPress={() => setActiveFilter(filter)}
               >
-                <Image
-                  source={{ uri: item.feature_image_url }}
-                  style={styles.productImage}
-                />
+                <Text
+                  style={[
+                    styles.filterText,
+                    activeFilter === filter && styles.filterActiveText,
+                  ]}
+                >
+                  {filter === "all"
+                    ? "All"
+                    : filter === "new"
+                    ? "New Arrival"
+                    : "Best Seller"}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
+        {/* PRODUCT GRID */}
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color="#000"
+            style={{ marginTop: 50 }}
+          />
+        ) : (
+          <View style={styles.grid}>
+            {displayedProducts.map((item) => {
+              const isFavorited = wishlist.some((w: any) => w.id === item.id);
+              return (
                 <TouchableOpacity
-                  style={styles.loveBtn}
+                  key={item.id}
+                  style={styles.card}
+                  activeOpacity={0.9}
                   onPress={() =>
-                    isFavorited ? removeWishlist(item.id) : addWishlist(item)
+                    router.push({
+                      pathname: "/screens/DetailProduct",
+                      params: { data: JSON.stringify(item) },
+                    })
                   }
                 >
-                  <Ionicons
-                    name={isFavorited ? "heart" : "heart-outline"}
-                    size={22}
-                    color={isFavorited ? "#e63946" : "#555"}
-                  />
+                  {/* 1. GAMBAR (Image Container) */}
+                  <View style={styles.imageContainer}>
+                    <Image
+                      source={{ uri: item.feature_image_url }}
+                      style={styles.productImage}
+                    />
+                    {/* Love Button Floating */}
+                    <TouchableOpacity
+                      style={styles.loveBtn}
+                      onPress={() =>
+                        isFavorited
+                          ? removeWishlist(item.id)
+                          : addWishlist(item)
+                      }
+                    >
+                      <Ionicons
+                        name={isFavorited ? "heart" : "heart-outline"}
+                        size={18}
+                        color={isFavorited ? "#e63946" : "#1a1a1a"}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* INFO AREA */}
+                  <View style={styles.cardInfo}>
+                    {/* 2. NAMA (Poppins Regular - Clean Luxury) */}
+                    <Text style={styles.productName} numberOfLines={1}>
+                      {item.name}
+                    </Text>
+
+                    {/* 3. RATING (Star Outline Emas) */}
+                    <View style={styles.ratingRow}>
+                      <Ionicons name="star-outline" size={14} color="#D4AF37" />
+                      <Text style={styles.ratingText}>{item.rating} / 5.0</Text>
+                    </View>
+
+                    {/* 4. HARGA (Poppins SemiBold - Tegas) */}
+                    <Text style={styles.price}>
+                      {formatCurrency(item.price)}
+                    </Text>
+
+                    {/* 5. BUTTON (Hitam Full - Add to Bag) */}
+                    <TouchableOpacity
+                      style={styles.buyNowBtn}
+                      onPress={() => handleBuyNow(item.name)}
+                    >
+                      <Text style={styles.buyNowText}>Buy Now</Text>
+                    </TouchableOpacity>
+                  </View>
                 </TouchableOpacity>
-
-                <Text style={styles.productName}>{item.name}</Text>
-                <Text style={styles.price}>{formatCurrency(item.price)}</Text>
-
-                <View style={styles.ratingRow}>
-                  <Ionicons name="star" size={16} color="#f4a261" />
-                  <Text style={styles.ratingText}>{item.rating}</Text>
-                </View>
-
-                <View style={styles.cardFooter}>
-                  <TouchableOpacity
-                    style={styles.buyNowBtn}
-                    onPress={() => handleBuyNow(item.name)}
-                  >
-                    <Text style={styles.buyNowText}>BUY NOW</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity>
-                    <Ionicons name="cart-outline" size={24} color="#222" />
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      )}
-
-      <View style={{ height: 80 }} />
-    </ScrollView>
+              );
+            })}
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+  mainContainer: { flex: 1, backgroundColor: "#fff" },
+
+  /* --- SEARCH BAR --- */
   searchWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f1f1f1",
+    backgroundColor: "#FAFAFA", // Abu sangat muda
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#EEE",
+    marginBottom: 15,
   },
   searchInput: {
-    fontFamily: "Poppins-Regular",
+    fontFamily: "Poppins-Regular", // Sesuai _layout.tsx
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
+    color: "#333",
   },
-  filterRow: {
-    flexDirection: "row",
-    marginTop: 15,
-    marginBottom: 20,
-    justifyContent: "flex-start",
-    gap: 10,
-  },
+
+  /* --- FILTER --- */
+  filterContainer: { marginBottom: 20 },
   filterButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 18,
-    backgroundColor: "#f1f1f1",
-    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    backgroundColor: "#fff",
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    marginRight: 10,
   },
-  filterText: {
-    fontFamily: "Poppins-Regular",
-    color: "#666",
-  },
-  filterActive: {
-    backgroundColor: "#111",
-    paddingVertical: 6,
-    paddingHorizontal: 18,
-    borderRadius: 10,
-  },
-  filterActiveText: {
-    color: "#fff",
-    fontFamily: "Poppins-SemiBold",
-  },
+  filterActive: { backgroundColor: "#1a1a1a", borderColor: "#1a1a1a" },
+  filterText: { fontFamily: "Poppins-Regular", fontSize: 12, color: "#888" },
+  filterActiveText: { color: "#fff", fontFamily: "Poppins-SemiBold" },
+
+  /* --- GRID SYSTEM --- */
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    gap: 15,
   },
+
+  /* --- CARD STYLE (Miliaran Vibe) --- */
   card: {
-    width: "48%",
+    width: cardWidth,
     backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 10,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  productImage: {
-    width: "100%",
-    height: 150,
     borderRadius: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
+    // Shadow super tipis biar clean
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
+
+  imageContainer: {
+    width: "100%",
+    height: 170, // Gambar agak tinggi biar mewah
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#F9F9F9",
+    position: "relative",
+  },
+  productImage: { width: "100%", height: "100%", resizeMode: "cover" },
   loveBtn: {
     position: "absolute",
-    right: 15,
-    top: 15,
+    top: 8,
+    right: 8,
     backgroundColor: "#fff",
     padding: 6,
-    borderRadius: 50,
-    elevation: 3,
+    borderRadius: 20,
+    elevation: 2,
   },
+
+  cardInfo: { padding: 12 },
+
+  /* --- TYPOGRAPHY & BUTTON --- */
   productName: {
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: "Poppins-Regular", // Clean look
     fontSize: 14,
-    marginTop: 10,
-  },
-  price: {
-    fontFamily: "Poppins-SemiBold",
-    color: "#d62828",
-    marginTop: 3,
+    color: "#1a1a1a",
+    marginBottom: 4,
   },
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 3,
+    marginBottom: 8,
   },
   ratingText: {
     marginLeft: 4,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
+    fontSize: 11,
+    color: "#888",
   },
-  cardFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 12,
-    alignItems: "center",
+  price: {
+    fontFamily: "Poppins-SemiBold", // Harga harus tegas
+    fontSize: 15,
+    color: "#1a1a1a",
+    marginBottom: 12,
   },
   buyNowBtn: {
-    backgroundColor: "#2a2a72",
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 10,
+    width: "100%",
+    backgroundColor: "#1a1a1a", // Hitam pekat (Luxury standard)
+    paddingVertical: 10,
+    borderRadius: 6,
+    alignItems: "center",
   },
   buyNowText: {
     color: "#fff",

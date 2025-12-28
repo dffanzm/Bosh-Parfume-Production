@@ -56,7 +56,7 @@ export const apiService = {
     }
   },
 
-  // 5. GET FEATURED PRODUCTS (BARU NIH 🔥)
+  // 5. GET FEATURED PRODUCTS
   getFeaturedProducts: async () => {
     try {
       const response = await fetch(`${API_URL}/products/featured`);
@@ -64,6 +64,18 @@ export const apiService = {
       return await response.json();
     } catch (error) {
       console.error("Error fetching featured products:", error);
+      return [];
+    }
+  },
+
+  // 6. GET DEVELOPERS (TIM HORE) <--- INI YANG BARU
+  getDevelopers: async () => {
+    try {
+      const response = await fetch(`${API_URL}/developers`);
+      if (!response.ok) throw new Error("Failed to fetch developers");
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching developers:", error);
       return [];
     }
   },

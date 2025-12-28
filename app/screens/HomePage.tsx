@@ -5,44 +5,98 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Platform,
+  Pressable,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, {
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { apiService } from "../services/api";
 
 const { width } = Dimensions.get("window");
-// Container Padding 20 kanan kiri, jadi width banner dikurang 40
 const BANNER_WIDTH = width - 40;
+
+// --- CARD COMPONENT ---
+const ProductCard = ({ item, index, router }: any) => {
+  const scale = useSharedValue(1);
+  const shadowOpacity = useSharedValue(0.1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    shadowOpacity: shadowOpacity.value,
+  }));
+
+  const handleHoverIn = () => {
+    scale.value = withSpring(1.03);
+    shadowOpacity.value = withTiming(0.3);
+  };
+
+  const handleHoverOut = () => {
+    scale.value = withSpring(1);
+    shadowOpacity.value = withTiming(0.1);
+  };
+
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(index * 100)
+        .springify()
+        .damping(12)}
+      style={[{ width: "48%" }, animatedStyle]}
+    >
+      <Pressable
+        style={({ pressed }) => [styles.card, { opacity: pressed ? 0.9 : 1 }]}
+        onHoverIn={handleHoverIn}
+        onHoverOut={handleHoverOut}
+        onPress={() =>
+          router.push({
+            pathname: "/screens/DetailProduct",
+            params: { data: JSON.stringify(item) },
+          })
+        }
+      >
+        <Image
+          source={{ uri: item.feature_image_url || item.image_url }}
+          style={styles.cardImage}
+        />
+        <View style={styles.nameOverlay}>
+          <Text style={styles.productName} numberOfLines={1}>
+            {item.name}
+          </Text>
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+};
 
 export default function HomePage() {
   const router = useRouter();
   const bannerRef = useRef<FlatList>(null);
 
-  // State untuk Data
-  const [banners, setBanners] = useState<any[]>([]);
-  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // LOGIC BALAPAN: Kita butuh REF buat nyimpen posisi tanpa memicu re-render
+  const currentIndexRef = useRef(0);
 
-  // State untuk Banner
   const [activeBanner, setActiveBanner] = useState(0);
-
-  // --- LOGIC BARU BIAR DOT GAK NABRAK ---
-  const currentIndexRef = useRef(0); // Ref buat nyimpen index real-time
-  const isInteracting = useRef(false); // Ref buat deteksi sentuhan user
+  const [banners, setBanners] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // FETCH DATA
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [bannerData, featuredData] = await Promise.all([
+        const [bannerData, productData] = await Promise.all([
           apiService.getBanners(),
-          apiService.getFeaturedProducts(),
+          apiService.getProducts(),
         ]);
         setBanners(bannerData);
-        setFeaturedProducts(featuredData);
+        setProducts(productData);
       } catch (error) {
         console.error("Gagal load home:", error);
       } finally {
@@ -52,41 +106,34 @@ export default function HomePage() {
     fetchData();
   }, []);
 
-  // AUTOPLAY BANNER (LOGIC FIX)
+  // --- LOGIC AUTOPLAY (MODE BALAPAN / NO RESET) ---
   useEffect(() => {
-    if (banners.length === 0) return;
+    if (!banners || banners.length === 0) return;
 
     const interval = setInterval(() => {
-      // Kalau user lagi nyentuh/geser, jangan auto scroll
-      if (isInteracting.current) return;
+      // 1. Ambil posisi terakhir dari REF (bukan dari State)
+      // Ini biar timer jalan terus tanpa peduli state lagi di-update user
+      let nextIndex = currentIndexRef.current + 1;
 
-      // Hitung next index dari Ref (bukan state, biar akurat)
-      const nextIndex =
-        currentIndexRef.current === banners.length - 1
-          ? 0
-          : currentIndexRef.current + 1;
+      if (nextIndex >= banners.length) {
+        nextIndex = 0;
+      }
 
-      // Scroll
-      bannerRef.current?.scrollToIndex({ index: nextIndex, animated: true });
+      // 2. Paksa Geser
+      bannerRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: true,
+      });
 
-      // Update data
-      setActiveBanner(nextIndex);
+      // 3. Update Ref & State
       currentIndexRef.current = nextIndex;
-    }, 4000);
+      setActiveBanner(nextIndex);
+    }, 4000); // 4 Detik
 
+    // CLEANUP: Cuma jalan pas component mati (unmount).
+    // GAK ADA reset pas user geser. Balapan gas pol!
     return () => clearInterval(interval);
-  }, [banners]); // Dependency cuma banners, gak perlu activeBanner biar gak reset terus
-
-  // Handle saat user selesai geser manual
-  const handleScrollEnd = (e: any) => {
-    const contentOffsetX = e.nativeEvent.contentOffset.x;
-    const index = Math.round(contentOffsetX / BANNER_WIDTH);
-
-    // Update state & ref biar sinkron
-    setActiveBanner(index);
-    currentIndexRef.current = index;
-    isInteracting.current = false; // User selesai interaksi
-  };
+  }, [banners.length]); // <--- Dependency cuma banners.length. GAK ADA activeBanner.
 
   if (loading) {
     return (
@@ -96,11 +143,9 @@ export default function HomePage() {
     );
   }
 
-  // --- HEADER (BANNER & TITLE) ---
   const HomeHeader = () => (
     <View style={{ marginBottom: 20 }}>
-      {/* BANNER AREA */}
-      <View style={styles.bannerWrapper}>
+      <View style={{ marginBottom: 15 }}>
         <FlatList
           ref={bannerRef}
           data={banners}
@@ -108,13 +153,20 @@ export default function HomePage() {
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item.id.toString()}
-          // Layout Calculation (Penting buat scrollToIndex)
           getItemLayout={(_, index) => ({
             length: BANNER_WIDTH,
             offset: BANNER_WIDTH * index,
             index,
           })}
-          // Handle Error kalau scroll kecepetan/belum siap
+          // Pas user geser manual, kita update Ref juga biar timer gak "kaget" banget
+          // Tapi timer GAK KIITA RESET.
+          onMomentumScrollEnd={(e) => {
+            const index = Math.round(
+              e.nativeEvent.contentOffset.x / BANNER_WIDTH
+            );
+            setActiveBanner(index);
+            currentIndexRef.current = index; // Update info lokasi buat si Timer
+          }}
           onScrollToIndexFailed={(info) => {
             const wait = new Promise((resolve) => setTimeout(resolve, 500));
             wait.then(() => {
@@ -124,91 +176,29 @@ export default function HomePage() {
               });
             });
           }}
-          // Deteksi User Interaksi (Biar gak rebutan sama Timer)
-          onScrollBeginDrag={() => {
-            isInteracting.current = true;
-          }}
-          onScrollEndDrag={() => {
-            isInteracting.current = false;
-          }}
-          // Update saat scroll berhenti (manual swipe)
-          onMomentumScrollEnd={handleScrollEnd}
-          snapToInterval={BANNER_WIDTH}
-          decelerationRate="fast"
           renderItem={({ item }) => (
-            <View style={{ width: BANNER_WIDTH, height: 200 }}>
+            <View style={{ width: BANNER_WIDTH }}>
               <Image source={{ uri: item.image_url }} style={styles.hero} />
             </View>
           )}
         />
-
-        {/* DOTS INDICATOR */}
-        <View style={styles.dotsContainer}>
-          {banners.map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                {
-                  backgroundColor:
-                    i === activeBanner ? "#fff" : "rgba(255,255,255,0.4)",
-                  width: i === activeBanner ? 20 : 6,
-                },
-              ]}
-            />
-          ))}
-        </View>
       </View>
-
-      {/* TITLE */}
-      <View style={{ marginTop: 25 }}>
-        <Text style={styles.sectionTitle}>Featured Collection</Text>
-      </View>
+      <Text style={styles.sectionTitle}>Featured Products</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={featuredProducts}
+        data={products}
         numColumns={2}
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={HomeHeader}
         columnWrapperStyle={{ justifyContent: "space-between" }}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100, paddingTop: 10 }}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No featured products yet.</Text>
-        }
+        contentContainerStyle={{ paddingBottom: 40, paddingTop: 10 }}
         renderItem={({ item, index }) => (
-          // Animasi FadeInDown tetep dipake biar smooth
-          <Animated.View
-            entering={FadeInDown.delay(index * 100)
-              .springify()
-              .damping(12)}
-            style={{ width: "48%" }}
-          >
-            <TouchableOpacity
-              style={styles.card}
-              activeOpacity={0.9}
-              onPress={() =>
-                router.push({
-                  pathname: "/screens/DetailProduct",
-                  params: { data: JSON.stringify(item) },
-                })
-              }
-            >
-              <Image
-                source={{ uri: item.feature_image_url }}
-                style={styles.cardImage}
-              />
-              <View style={styles.nameOverlay}>
-                <Text style={styles.productName} numberOfLines={1}>
-                  {item.name}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </Animated.View>
+          <ProductCard item={item} index={index} router={router} />
         )}
       />
     </View>
@@ -226,78 +216,39 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  emptyText: {
-    textAlign: "center",
-    marginTop: 20,
-    color: "#888",
-    fontFamily: "Poppins-Regular",
-  },
-
-  /* --- BANNER STYLE --- */
-  bannerWrapper: {
-    marginTop: 10,
+  hero: {
+    width: BANNER_WIDTH,
     height: 200,
     borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: "#fff",
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-  },
-  hero: {
-    width: "100%",
-    height: "100%",
     resizeMode: "cover",
   },
-  dotsContainer: {
-    position: "absolute",
-    bottom: 12,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  dot: {
-    height: 6,
-    borderRadius: 3,
-    marginHorizontal: 3,
-  },
-
   sectionTitle: {
     fontSize: 18,
     fontFamily: "Poppins-SemiBold",
+    marginBottom: 10,
     color: "#1a1a1a",
   },
-
-  /* --- CARD STYLE (LIFTED SHADOW / 2 SUDUT) --- */
   card: {
     width: "100%",
     height: 220,
     backgroundColor: "#fff",
     borderRadius: 18,
     marginBottom: 20,
-
-    // SHADOW 2 SUDUT (KANAN & BAWAH)
     shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
-
-    // Android Elevation
-    elevation: 4,
-
+    elevation: 3,
     overflow: "hidden",
+    ...Platform.select({
+      web: { cursor: "pointer" },
+    }),
   },
-
   cardImage: {
     width: "100%",
     height: "100%",
     resizeMode: "cover",
   },
-
   nameOverlay: {
     position: "absolute",
     bottom: 0,
