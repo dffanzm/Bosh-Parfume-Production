@@ -1,5 +1,6 @@
 import { usePathname, useRouter } from "expo-router";
-import { Handbag, Heart, House } from "lucide-react-native";
+// Tambah import SprayCan (Icon Parfum)
+import { Handbag, Heart, House, SprayCan } from "lucide-react-native";
 import React, { useMemo, useRef } from "react";
 import {
   Animated,
@@ -11,6 +12,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+// UPDATE LEBAR NAVBAR BIAR MUAT 4 ICON
+const NAVBAR_WIDTH_PCT = 0.85;
 
 type NavItem = {
   id: number;
@@ -36,13 +40,20 @@ export default function Navbar() {
       },
       {
         id: 2,
+        path: "/screens/FindScent", // <--- ITEM BARU
+        icon: SprayCan, // <--- Icon Parfum
+        activeColor: "#000000", // Bisa ganti warna ungu/emas kalo mau beda
+        inactiveColor: "#8E8E93",
+      },
+      {
+        id: 3,
         path: "/screens/Product",
         icon: Handbag,
         activeColor: "#000000",
         inactiveColor: "#8E8E93",
       },
       {
-        id: 3,
+        id: 4,
         path: "/screens/Wishlist",
         icon: Heart,
         activeColor: "#FF375F",
@@ -106,14 +117,15 @@ export default function Navbar() {
     });
   }, [path]);
 
-  const availableSpace = SCREEN_WIDTH * 0.72 - 44 * 3;
-  const spacingBetweenIcons = availableSpace / 4;
+  // HITUNG SPACING DINAMIS (Berdasarkan jumlah item)
+  const availableSpace = SCREEN_WIDTH * NAVBAR_WIDTH_PCT - 44 * navItems.length;
+  const spacingBetweenIcons = availableSpace / (navItems.length + 1);
 
   return (
     <View
       style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 16) }]}
     >
-      <View style={[styles.bar, { width: SCREEN_WIDTH * 0.72 }]}>
+      <View style={[styles.bar, { width: SCREEN_WIDTH * NAVBAR_WIDTH_PCT }]}>
         <View style={{ width: spacingBetweenIcons }} />
 
         {navItems.map((item, index) => {
@@ -146,6 +158,7 @@ export default function Navbar() {
                 </Animated.View>
               </TouchableOpacity>
 
+              {/* Spacing antar icon */}
               {index < navItems.length - 1 && (
                 <View style={{ width: spacingBetweenIcons }} />
               )}

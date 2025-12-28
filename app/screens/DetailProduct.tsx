@@ -1,6 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import {
   Image,
+  Linking, // Import Linking
   ScrollView,
   StyleSheet,
   Text,
@@ -10,22 +12,36 @@ import {
 import { formatCurrency } from "../utils/currency";
 
 export default function DetailProduct() {
-  // ambil data dari param (gambar, nama, harga, dll)
   const params = useLocalSearchParams();
   const product = JSON.parse(
     typeof params.data === "string" ? params.data : "{}"
   );
 
+  // --- CONFIG WHATSAPP (NOMOR ADMIN ASLI) ---
+  const WHATSAPP_NUMBER = "6282125902548";
+
+  const handleBuyNow = () => {
+    const message = `Halo Admin Bosh Parfume, saya tertarik dengan produk *${
+      product.name
+    }* harga ${formatCurrency(product.price)}. Apakah stok masih ada?`;
+
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+      message
+    )}`;
+
+    Linking.openURL(url).catch((err) =>
+      console.error("Gagal membuka WhatsApp", err)
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
-      {/* HEADER IMAGE - Pake URI */}
+      {/* HEADER IMAGE */}
       <Image source={{ uri: product.image_url }} style={styles.banner} />
 
       {/* CONTENT */}
       <View style={styles.content}>
         <Text style={styles.name}>{product.name} - BOSH PARFUME</Text>
-        
-        {/* PRICE - Pake Format Currency */}
         <Text style={styles.price}>{formatCurrency(product.price)}</Text>
 
         {/* SIZE */}
@@ -34,35 +50,55 @@ export default function DetailProduct() {
           <Text style={styles.sizeText}>30 ml</Text>
         </TouchableOpacity>
 
-        {/* DESCRIPTION - Handle kalau kosong */}
+        {/* DESCRIPTION */}
         <Text style={styles.sectionTitle}>Description</Text>
         <Text style={styles.description}>
-          {product.description || "Parfum dengan aroma gourmand yang hangat, creamy, dan manis lembut."}
+          {product.description || "No description available."}
         </Text>
 
         {/* FRAGRANCE NOTES */}
         <Text style={styles.sectionTitle}>Fragrance Notes</Text>
 
         <View style={styles.notesRow}>
+          {/* Top Note */}
           <View style={styles.noteBox}>
             <Text style={styles.noteTitle}>Top</Text>
-            <Text style={styles.noteValue}>Vanilla Bean</Text>
+            <Text style={styles.noteValue}>
+              {product.top_note ? product.top_note : "-"}
+            </Text>
           </View>
 
+          {/* Middle Note */}
           <View style={styles.noteBox}>
             <Text style={styles.noteTitle}>Middle</Text>
-            <Text style={styles.noteValue}>Creamy Notes</Text>
+            <Text style={styles.noteValue}>
+              {product.middle_note ? product.middle_note : "-"}
+            </Text>
           </View>
 
+          {/* Base Note */}
           <View style={styles.noteBox}>
             <Text style={styles.noteTitle}>Base</Text>
-            <Text style={styles.noteValue}>Amber, Musk, Soft Woods</Text>
+            <Text style={styles.noteValue}>
+              {product.base_note ? product.base_note : "-"}
+            </Text>
           </View>
         </View>
 
-        {/* ADD TO WISHLIST BUTTON */}
-        <TouchableOpacity style={styles.cartBtn}>
-          <Text style={styles.cartText}>Add to Wishlist</Text>
+        {/* ACTION BUTTON -> BUY NOW (WHATSAPP) */}
+        <TouchableOpacity
+          style={styles.cartBtn}
+          activeOpacity={0.8}
+          onPress={handleBuyNow}
+        >
+          {/* Icon WA */}
+          <Ionicons
+            name="logo-whatsapp"
+            size={24}
+            color="white"
+            style={{ marginRight: 10 }}
+          />
+          <Text style={styles.cartText}>Buy Now via WhatsApp</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -135,6 +171,7 @@ const styles = StyleSheet.create({
   noteTitle: {
     fontFamily: "Poppins-SemiBold",
     marginBottom: 6,
+    color: "#222",
   },
 
   noteValue: {
@@ -144,17 +181,27 @@ const styles = StyleSheet.create({
     color: "#444",
   },
 
+  // STYLING TOMBOL CHECKOUT (HIJAU WA)
   cartBtn: {
-    backgroundColor: "#1c1c3c",
+    backgroundColor: "#25D366", // Warna WA
     paddingVertical: 16,
-    borderRadius: 10,
+    borderRadius: 15,
     marginTop: 40,
+    marginBottom: 40,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#25D366",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
   },
 
   cartText: {
     color: "#fff",
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: 16,
+    fontFamily: "Poppins-Bold",
+    letterSpacing: 0.5,
   },
 });

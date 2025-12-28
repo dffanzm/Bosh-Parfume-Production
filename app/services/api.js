@@ -55,4 +55,16 @@ export const apiService = {
       return [];
     }
   },
+
+  // 5. GET FEATURED PRODUCTS (BARU NIH 🔥)
+  getFeaturedProducts: async () => {
+    try {
+      const response = await fetch(`${API_URL}/products/featured`);
+      if (!response.ok) throw new Error("Failed to fetch featured");
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching featured products:", error);
+      return [];
+    }
+  },
 };
