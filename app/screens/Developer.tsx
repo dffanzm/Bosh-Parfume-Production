@@ -240,7 +240,7 @@ export default function Developer() {
               entering={FadeInUp.delay(1000).duration(600)}
               style={styles.footerQuote}
             >
-              "<code> &lt;/&gt; WITH BOSH ENERGY </code>"
+              {'</> WITH BOSH ENERGY'}
             </Animated.Text>
           }
         />
