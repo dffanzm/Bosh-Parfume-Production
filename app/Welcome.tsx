@@ -36,7 +36,7 @@ export default function Welcome() {
 
   return (
     <ImageBackground
-      source={require("../assets/header.png")}
+      source={require("../assets/Welcome.png")}
       style={styles.background}
     >
       <LinearGradient
