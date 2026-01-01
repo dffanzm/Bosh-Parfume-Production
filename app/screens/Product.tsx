@@ -1,11 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage"; //
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
   Image,
   Linking,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,20 +15,24 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { apiService } from "../services/api";
+import { apiService } from "../services/api"; //
 import { useWishlist } from "../store/useWishlist";
 import { formatCurrency } from "../utils/currency";
 
 const { width } = Dimensions.get("window");
-// Card width: (Layar - Padding 20x2 - Gap 15) / 2
 const cardWidth = (width - 40 - 15) / 2;
 
+// Key unik untuk caching produk per kategori
+const PRODUCT_CACHE_PREFIX = "cache_products_";
+
 export default function Product() {
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState("all");
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [displayedProducts, setDisplayedProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); // State Pull-to-Refresh
 
   const wishlist = useWishlist((state: any) => state.items);
   const addWishlist = useWishlist((state: any) => state.addToWishlist);
@@ -41,21 +47,52 @@ export default function Product() {
     );
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+  // --- LOGIC FETCH DENGAN CACHING ---
+  const fetchProducts = useCallback(
+    async (tag: string, forceRefresh = false) => {
+      const cacheKey = `${PRODUCT_CACHE_PREFIX}${tag}`;
+
       try {
-        const data = await apiService.getProductsByTag(activeFilter);
+        if (!forceRefresh) {
+          // 1. Cek cache lokal dulu biar instan
+          const cachedData = await AsyncStorage.getItem(cacheKey);
+          if (cachedData) {
+            const parsed = JSON.parse(cachedData);
+            setAllProducts(parsed);
+            setDisplayedProducts(parsed);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // 2. Jika tidak ada cache atau ditarik ke bawah (refresh), ambil dari API
+        if (!refreshing) setLoading(true);
+        const data = await apiService.getProductsByTag(tag); //
         setAllProducts(data);
         setDisplayedProducts(data);
+
+        // 3. Simpan hasil terbaru ke Cache
+        await AsyncStorage.setItem(cacheKey, JSON.stringify(data));
       } catch (error) {
-        console.error(error);
+        console.error("Gagal load produk:", error);
       } finally {
         setLoading(false);
+        setRefreshing(false);
       }
-    };
-    fetchData();
-  }, [activeFilter]);
+    },
+    [refreshing]
+  );
+
+  // Jalankan fetch saat filter kategori berubah
+  useEffect(() => {
+    fetchProducts(activeFilter);
+  }, [activeFilter, fetchProducts]);
+
+  // Handler untuk Pull-to-Refresh
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProducts(activeFilter, true); // Paksa ambil data baru dari server
+  };
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
@@ -77,13 +114,17 @@ export default function Product() {
     <View style={styles.mainContainer}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 100,
-          paddingHorizontal: 20,
-          paddingTop: 10,
-        }}
+        contentContainerStyle={styles.scrollContent}
+        // Pasang fitur tarik bawah untuk update data
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#000"
+          />
+        }
       >
-        {/* SEARCH BAR (Clean Style) */}
+        {/* SEARCH BAR */}
         <View style={styles.searchWrapper}>
           <Ionicons
             name="search-outline"
@@ -130,7 +171,7 @@ export default function Product() {
         </View>
 
         {/* PRODUCT GRID */}
-        {loading ? (
+        {loading && !refreshing ? (
           <ActivityIndicator
             size="large"
             color="#000"
@@ -152,13 +193,11 @@ export default function Product() {
                     })
                   }
                 >
-                  {/* 1. GAMBAR (Image Container) */}
                   <View style={styles.imageContainer}>
                     <Image
-                      source={{ uri: item.feature_image_url }}
+                      source={{ uri: item.feature_image_url || item.image_url }}
                       style={styles.productImage}
                     />
-                    {/* Love Button Floating */}
                     <TouchableOpacity
                       style={styles.loveBtn}
                       onPress={() =>
@@ -175,25 +214,17 @@ export default function Product() {
                     </TouchableOpacity>
                   </View>
 
-                  {/* INFO AREA */}
                   <View style={styles.cardInfo}>
-                    {/* 2. NAMA (Poppins Regular - Clean Luxury) */}
                     <Text style={styles.productName} numberOfLines={1}>
                       {item.name}
                     </Text>
-
-                    {/* 3. RATING (Star Outline Emas) */}
                     <View style={styles.ratingRow}>
                       <Ionicons name="star-outline" size={14} color="#D4AF37" />
                       <Text style={styles.ratingText}>{item.rating} / 5.0</Text>
                     </View>
-
-                    {/* 4. HARGA (Poppins SemiBold - Tegas) */}
                     <Text style={styles.price}>
                       {formatCurrency(item.price)}
                     </Text>
-
-                    {/* 5. BUTTON (Hitam Full - Add to Bag) */}
                     <TouchableOpacity
                       style={styles.buyNowBtn}
                       onPress={() => handleBuyNow(item.name)}
@@ -213,12 +244,15 @@ export default function Product() {
 
 const styles = StyleSheet.create({
   mainContainer: { flex: 1, backgroundColor: "#fff" },
-
-  /* --- SEARCH BAR --- */
+  scrollContent: {
+    paddingBottom: 100,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
   searchWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FAFAFA", // Abu sangat muda
+    backgroundColor: "#FAFAFA",
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
@@ -226,13 +260,11 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   searchInput: {
-    fontFamily: "Poppins-Regular", // Sesuai _layout.tsx
+    fontFamily: "Poppins-Regular",
     flex: 1,
     fontSize: 14,
     color: "#333",
   },
-
-  /* --- FILTER --- */
   filterContainer: { marginBottom: 20 },
   filterButton: {
     paddingVertical: 8,
@@ -246,16 +278,12 @@ const styles = StyleSheet.create({
   filterActive: { backgroundColor: "#1a1a1a", borderColor: "#1a1a1a" },
   filterText: { fontFamily: "Poppins-Regular", fontSize: 12, color: "#888" },
   filterActiveText: { color: "#fff", fontFamily: "Poppins-SemiBold" },
-
-  /* --- GRID SYSTEM --- */
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
     gap: 15,
   },
-
-  /* --- CARD STYLE (Miliaran Vibe) --- */
   card: {
     width: cardWidth,
     backgroundColor: "#fff",
@@ -263,17 +291,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: "#F5F5F5",
-    // Shadow super tipis biar clean
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
   },
-
   imageContainer: {
     width: "100%",
-    height: 170, // Gambar agak tinggi biar mewah
+    height: 170,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     overflow: "hidden",
@@ -290,12 +316,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     elevation: 2,
   },
-
   cardInfo: { padding: 12 },
-
-  /* --- TYPOGRAPHY & BUTTON --- */
   productName: {
-    fontFamily: "Poppins-Regular", // Clean look
+    fontFamily: "Poppins-Regular",
     fontSize: 14,
     color: "#1a1a1a",
     marginBottom: 4,
@@ -312,14 +335,14 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   price: {
-    fontFamily: "Poppins-SemiBold", // Harga harus tegas
+    fontFamily: "Poppins-SemiBold",
     fontSize: 15,
     color: "#1a1a1a",
     marginBottom: 12,
   },
   buyNowBtn: {
     width: "100%",
-    backgroundColor: "#1a1a1a", // Hitam pekat (Luxury standard)
+    backgroundColor: "#1a1a1a",
     paddingVertical: 10,
     borderRadius: 6,
     alignItems: "center",

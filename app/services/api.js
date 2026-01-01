@@ -1,6 +1,3 @@
-// services/api.js
-
-// Pastikan ini URL Vercel lu yang aktif
 const API_URL = "https://bosh-render.vercel.app/api";
 
 export const apiService = {

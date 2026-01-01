@@ -101,7 +101,7 @@ export default function FindScent() {
     }, 200);
   };
 
-  // --- 3. SMART SEARCH LOGIC (MULTI KEYWORD + HIDDEN EASTER EGG) ---
+  // --- 3. SMART SEARCH LOGIC ---
   useEffect(() => {
     if (viewState !== "search") return;
 
@@ -110,7 +110,6 @@ export default function FindScent() {
       return;
     }
 
-    // --- 🕵️‍♂️ EASTER EGG DETECTOR (DIAM-DIAM AJA) ---
     const lowerQuery = searchText.toLowerCase();
     const secretKeywords = [
       "siapa developernya",
@@ -126,15 +125,13 @@ export default function FindScent() {
     );
 
     if (isSecret) {
-      setSearchText(""); // Hapus text
-      router.push("/screens/Developer"); // Lempar ke secret page
+      setSearchText("");
+      router.push("/screens/Developer");
       return;
     }
-    // ------------------------------------------------
 
     setLoading(true);
     const timer = setTimeout(() => {
-      // LOGIC MULTI KEYWORD (ROSE, VANILLA)
       const searchKeywords = lowerQuery
         .split(/[\s,]+/)
         .filter((k) => k.length > 0);
@@ -158,7 +155,7 @@ export default function FindScent() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchText]);
+  }, [searchText, viewState, allProducts, router]); // Dependency lengkap buat linting
 
   const addNoteToInput = (note: string) => {
     const newText = searchText ? `${searchText}, ${note}` : note;
@@ -233,7 +230,6 @@ export default function FindScent() {
             <Animated.View entering={FadeInDown.delay(300).duration(500)}>
               <Text style={styles.question}>Lagi nyari wangi kaya gimana?</Text>
 
-              {/* === HINT RAHASIANYA UDAH DIHAPUS, BALIK NORMAL === */}
               <Text style={styles.subQuestion}>
                 Ketik wangi (misal: Vanilla, Rose) atau pilih dari bubbles di
                 bawah.
@@ -300,7 +296,7 @@ export default function FindScent() {
                   ListEmptyComponent={
                     searchText.length > 2 ? (
                       <Text style={styles.emptyText}>
-                        Wangi "{searchText}" belum ada nih.
+                        Wangi &quot;{searchText}&quot; belum ada nih.
                       </Text>
                     ) : null
                   }

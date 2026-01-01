@@ -1,15 +1,6 @@
-// components/NoInternet.tsx
-import { WifiOff } from "lucide-react-native"; // Pake icon dari Lucide biar sama kayak Navbar
+import { WifiOff } from "lucide-react-native";
 import React from "react";
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-const { width } = Dimensions.get("window");
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface NoInternetProps {
   onRetry: () => void;
@@ -46,6 +37,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 30,
+    // Kita biarkan flex: 1 yang bekerja tanpa butuh variabel height di sini
   },
   iconWrapper: {
     width: 120,
@@ -58,7 +50,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontFamily: "Poppins-Bold", // Sesuaikan font kamu
+    fontFamily: "Poppins-Bold",
     color: "#1E293B",
     marginBottom: 10,
     textAlign: "center",

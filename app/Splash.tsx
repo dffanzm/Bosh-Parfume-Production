@@ -1,13 +1,6 @@
-// app/Splash.tsx
 import { router } from "expo-router";
 import { useEffect, useRef } from "react";
-import {
-  Animated,
-  Dimensions,
-  Image,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Animated, Dimensions, Image, StyleSheet, View } from "react-native";
 
 const { width } = Dimensions.get("window");
 
@@ -34,7 +27,8 @@ export default function Splash() {
     }, 1600); // total ≈ 2s (800 fade-in + 800 stay)
 
     return () => clearTimeout(timer);
-  }, []);
+    // REVISI: Masukkan opacity ke dependency array agar linter puas
+  }, [opacity]);
 
   return (
     <View style={styles.container}>

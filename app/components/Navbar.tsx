@@ -1,7 +1,6 @@
 import { usePathname, useRouter } from "expo-router";
-// Tambah import SprayCan (Icon Parfum)
 import { Handbag, Heart, House, SprayCan } from "lucide-react-native";
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   Animated,
   Dimensions,
@@ -13,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-// UPDATE LEBAR NAVBAR BIAR MUAT 4 ICON
+// NAVBAR WIDTH 85% dari layar
 const NAVBAR_WIDTH_PCT = 0.85;
 
 type NavItem = {
@@ -40,9 +39,9 @@ export default function Navbar() {
       },
       {
         id: 2,
-        path: "/screens/FindScent", // <--- ITEM BARU
-        icon: SprayCan, // <--- Icon Parfum
-        activeColor: "#000000", // Bisa ganti warna ungu/emas kalo mau beda
+        path: "/screens/FindScent",
+        icon: SprayCan,
+        activeColor: "#000000",
         inactiveColor: "#8E8E93",
       },
       {
@@ -65,7 +64,7 @@ export default function Navbar() {
 
   const isActive = (itemPath: string) => path === itemPath;
 
-  // Animations
+  // Animations refs
   const scaleAnimations = useRef(
     navItems.map(() => new Animated.Value(1))
   ).current;
@@ -77,63 +76,66 @@ export default function Navbar() {
   const handlePress = (itemPath: string) => {
     if (isActive(itemPath)) return;
 
-    // reset anim
+    // Reset animasli semua icon sebelum pindah
     navItems.forEach((_, i) => {
-      Animated.spring(scaleAnimations[i], {
-        toValue: 1,
-        tension: 180,
-        friction: 12,
-        useNativeDriver: true,
-      }).start();
-
-      Animated.spring(translateAnimations[i], {
-        toValue: 0,
-        tension: 180,
-        friction: 12,
-        useNativeDriver: true,
-      }).start();
+      Animated.parallel([
+        Animated.spring(scaleAnimations[i], {
+          toValue: 1,
+          tension: 180,
+          friction: 12,
+          useNativeDriver: true,
+        }),
+        Animated.spring(translateAnimations[i], {
+          toValue: 0,
+          tension: 180,
+          friction: 12,
+          useNativeDriver: true,
+        }),
+      ]).start();
     });
 
-    router.push(itemPath as any);
+    // REVISI: Pakai replace biar sinkron sama animasi slide per page
+    router.replace(itemPath as any);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     navItems.forEach((item, index) => {
       const active = isActive(item.path);
 
-      Animated.spring(scaleAnimations[index], {
-        toValue: active ? 1.04 : 1,
-        tension: 200,
-        friction: 16,
-        useNativeDriver: true,
-      }).start();
-
-      Animated.spring(translateAnimations[index], {
-        toValue: active ? -2 : 0,
-        tension: 200,
-        friction: 17,
-        useNativeDriver: true,
-      }).start();
+      Animated.parallel([
+        Animated.spring(scaleAnimations[index], {
+          toValue: active ? 1.08 : 1,
+          tension: 200,
+          friction: 16,
+          useNativeDriver: true,
+        }),
+        Animated.spring(translateAnimations[index], {
+          toValue: active ? -3 : 0,
+          tension: 200,
+          friction: 17,
+          useNativeDriver: true,
+        }),
+      ]).start();
     });
-  }, [path]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, navItems]);
 
-  // HITUNG SPACING DINAMIS (Berdasarkan jumlah item)
-  const availableSpace = SCREEN_WIDTH * NAVBAR_WIDTH_PCT - 44 * navItems.length;
+  // HITUNG SPACING DINAMIS
+  const totalNavWidth = SCREEN_WIDTH * NAVBAR_WIDTH_PCT;
+  const iconSize = 44;
+  const availableSpace = totalNavWidth - iconSize * navItems.length;
   const spacingBetweenIcons = availableSpace / (navItems.length + 1);
 
   return (
     <View
       style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 16) }]}
     >
-      <View style={[styles.bar, { width: SCREEN_WIDTH * NAVBAR_WIDTH_PCT }]}>
+      <View style={[styles.bar, { width: totalNavWidth }]}>
         <View style={{ width: spacingBetweenIcons }} />
 
         {navItems.map((item, index) => {
           const active = isActive(item.path);
           const Icon = item.icon;
-
-          const scaleAnim = scaleAnimations[index];
-          const translateAnim = translateAnimations[index];
 
           return (
             <React.Fragment key={item.id}>
@@ -145,20 +147,19 @@ export default function Navbar() {
                 <Animated.View
                   style={{
                     transform: [
-                      { scale: scaleAnim },
-                      { translateY: translateAnim },
+                      { scale: scaleAnimations[index] },
+                      { translateY: translateAnimations[index] },
                     ],
                   }}
                 >
                   <Icon
-                    size={active ? 27 : 23}
+                    size={active ? 26 : 22}
                     color={active ? item.activeColor : item.inactiveColor}
-                    strokeWidth={active ? 2.5 : 1.8}
+                    strokeWidth={active ? 2.5 : 2}
                   />
                 </Animated.View>
               </TouchableOpacity>
 
-              {/* Spacing antar icon */}
               {index < navItems.length - 1 && (
                 <View style={{ width: spacingBetweenIcons }} />
               )}
@@ -186,18 +187,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    paddingVertical: 14,
-    height: 58,
+    borderRadius: 24,
+    paddingVertical: 10,
+    height: 62, // Sedikit lebih tinggi biar icon nafas
 
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 5,
 
-    borderWidth: 0.5,
-    borderColor: "rgba(0,0,0,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.03)",
   },
   touch: {
     width: 44,

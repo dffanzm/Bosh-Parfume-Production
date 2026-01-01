@@ -1,11 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-// 1. IMPORT BLURVIEW
 import { BlurView } from "expo-blur";
+import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
   FlatList,
   Image,
   Linking,
@@ -27,9 +25,8 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { apiService } from "../services/api";
 
-const { width } = Dimensions.get("window");
-
-interface Developer {
+// 1. REVISI: Nama Interface diganti jadi IDeveloper biar gak tabrakan sama nama Komponen
+interface IDeveloper {
   id: number;
   nama: string;
   jobdesk: string;
@@ -70,7 +67,8 @@ const CodeParticle = ({ text, style }: { text: string; style: any }) => {
       -1,
       true
     );
-  }, []);
+    // 2. REVISI: Dependency translateY ditambahin
+  }, [translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -81,7 +79,8 @@ const CodeParticle = ({ text, style }: { text: string; style: any }) => {
 
 export default function Developer() {
   const router = useRouter();
-  const [developers, setDevelopers] = useState<Developer[]>([]);
+  // 3. REVISI: Pake interface IDeveloper
+  const [developers, setDevelopers] = useState<IDeveloper[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -119,7 +118,6 @@ export default function Developer() {
       top: Math.random() * 100,
       left: Math.random() * 100,
       fontSize: Math.random() * 14 + 12,
-      // Opacity Agak Tebal biar keliatan efek blurnya nanti
       opacity: Math.random() * 0.5 + 0.3,
     }));
   }, []);
@@ -178,15 +176,10 @@ export default function Developer() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           renderItem={({ item, index }) => (
-            // WRAPPER ANIMASI
             <Animated.View
               entering={FadeInUp.delay(400 + index * 100).springify()}
-              style={styles.cardWrapper} // Style container buat border radius & shadow
+              style={styles.cardWrapper}
             >
-              {/* 3. BLUR VIEW (REAL GLASS EFFECT) 
-                  intensity: Seberapa nge-blur (0-100)
-                  tint: Warna dasar kaca (dark, light, default)
-              */}
               <BlurView intensity={40} tint="dark" style={styles.blurContainer}>
                 {/* FOTO */}
                 <View style={styles.bigImageContainer}>
@@ -240,7 +233,7 @@ export default function Developer() {
               entering={FadeInUp.delay(1000).duration(600)}
               style={styles.footerQuote}
             >
-              {'</> WITH BOSH ENERGY'}
+              {"</> WITH BOSH ENERGY"}
             </Animated.Text>
           }
         />
@@ -294,30 +287,24 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 50,
   },
-
-  // --- STYLE UNTUK BLUR VIEW ---
   cardWrapper: {
     marginBottom: 20,
     borderRadius: 24,
-    overflow: "hidden", // Wajib biar blurnya gak bocor keluar radius
+    overflow: "hidden",
     borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.25)", // Border terang
+    borderColor: "rgba(255, 255, 255, 0.25)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 15,
     elevation: 8,
   },
-
   blurContainer: {
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
-    // Warna tambahan biar makin 'Terang' di atas Blur Dark
     backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
-
-  // --- ELEMEN DALAM CARD ---
   bigImageContainer: {
     width: 90,
     height: 90,
