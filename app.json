@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "bosh-mobile-frontend",
+    "name": "Bosh-Parfume",
     "slug": "bosh-mobile-frontend",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -19,11 +19,12 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.bosh.parfume"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       "expo-router",
@@ -43,6 +44,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b1cdf2a4-dbd3-48b6-9e77-6d0a8a21d948"
+      }
     }
   }
 }

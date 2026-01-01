@@ -5,7 +5,6 @@ export const useWishlist = create((set) => ({
 
   addToWishlist: (product: any) =>
     set((state: any) => {
-      // Cegah duplikat
       if (state.items.some((i: any) => i.id === product.id)) return state;
       return { items: [...state.items, product] };
     }),
