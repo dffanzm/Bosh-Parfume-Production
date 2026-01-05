@@ -1,50 +1,108 @@
-# Welcome to your Expo app 👋
+📦 Bosh Parfume Production
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Bosh Parfume Production adalah aplikasi mobile cross-platform yang dibangun menggunakan Expo (React Native) untuk membantu manajemen produksi parfum — mulai dari katalog produk, pengelolaan stok, hingga proses produksi. Aplikasi ini cocok digunakan oleh tim produksi kecil dan menengah yang ingin mengorganisir data produksi parfum secara efisien.
 
-## Get started
+🚀 Fitur Utama
 
-1. Install dependencies
+🎯 Fungsi utama yang tersedia:
 
-   ```bash
-   npm install
-   ```
+📋 Daftar parfum & detail produk
 
-2. Start the app
+➕ Tambah/Edit produk produksi
 
-   ```bash
-   npx expo start
-   ```
+📊 Tampilan data produksi
 
-In the output, you'll find options to open the app in a
+📦 Manajemen stok bahan
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+🔎 Pencarian cepat produk
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+📱 UI yang responsif untuk Android & iOS
 
-## Get a fresh project
+(Tambahkan fitur lain sesuai implementasi kamu)
 
-When you're ready, run:
+🧠 Teknologi yang Digunakan
 
-```bash
-npm run reset-project
-```
+Aplikasi ini dibangun dengan teknologi berikut:
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Teknologi	Versi / Keterangan
+⚛️ React Native	via Expo CLI
+📦 Expo	Manajemen proyek & build
+🧪 JavaScript / TypeScript	Bahasa pemrograman
+📱 Android & iOS	Platform target
+📌 Screenshot (opsional)
 
-## Learn more
+Kamu dapat menambahkan screenshot atau GIF UI aplikasi di sini untuk memperlihatkan tampilan interface kepada pengunjung.
 
-To learn more about developing your project with Expo, look at the following resources:
+🛠️ Persiapan & Installasi
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Ikuti langkah berikut untuk menjalankan aplikasi di lokal:
 
-## Join the community
+🔁 1. Clone repository
+git clone https://github.com/dffanzm/Bosh-Parfume-Production.git
+cd Bosh-Parfume-Production
 
-Join our community of developers creating universal apps.
+📦 2. Install dependencies
+npm install
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+atau jika menggunakan Yarn:
+
+yarn
+
+📲 3. Jalankan aplikasi
+npx expo start
+
+
+Expo akan membuka interface Dev Tools di browser kamu.
+Dari sana kamu bisa memilih:
+
+✔ Jalankan di Android emulator
+✔ Jalankan di iOS simulator
+✔ Buka di Expo Go di perangkat fisik
+
+⚙️ Konfigurasi (Opsional)
+
+Jika kamu memakai API atau service eksternal, jelaskan cara menambahkan konfigurasi di sini (mis: env, API keys, dsb).
+
+🧩 Struktur Proyek
+
+Penjelasan singkat struktur folder (opsional tapi membantu):
+
+📁 app/           – kode utama aplikasi
+📁 assets/        – gambar & resource statis
+📄 app.json       – konfigurasi Expo
+📄 package.json   – dependencies & scripts
+...
+
+🧑‍💻 Cara Berkontribusi
+
+Kalau proyek ini bersifat open source dan kamu ingin mengundang kolaborator:
+
+Fork repo ini
+
+Buat branch fitur baru:
+
+git checkout -b fitur-baru
+
+
+Commit perubahan kamu
+
+Push ke branch kamu
+
+Buat Pull Request
+
+Tuliskan detail perubahan supaya reviewer mudah memahami update kamu.
+
+❤️ Kontributor
+
+Terima kasih kepada mereka yang sudah berkontribusi:
+
+dffanzm – Developer utama
+
+dnjwna joelucy – Kontributor
+
+(atau tambahkan tim lain jika ada)
+
+📄 License
+
+Lisensi yang digunakan dalam proyek ini: — (tambahkan jika kamu ingin open source, misalnya MIT License)
