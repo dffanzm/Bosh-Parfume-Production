@@ -9,7 +9,7 @@ Empowering Fragrance Discovery through Technology
 
 | Farhan Munir Rohmatullah | Daffa Najmudin Hanif | Danu Trisna Juwana | Azka Asettya Defano |
 | :---: | :---: | :---: | :---: |
-| <img src="https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766908740843.jpg" width="120" height="120" style="border-radius:50%;" /> | <img src="https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766907769174.jpg" width="120" height="120" style="border-radius:50%;" /> | <img src="https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766907256618.jpg" width="120" height="120" style="border-radius:50%;" /> | <img src="https://ui-avatars.com/api/?name=Azka+Assetya&background=random&color=fff&size=200" width="120" height="120" style="border-radius:50%;" /> |
+| <img src="https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766908740843.jpg" width="120" height="120" style="border-radius:50%;" /> | <img src="https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766907769174.jpg" width="120" height="120" style="border-radius:50%;" /> | <img src="https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766907256618.jpg" width="120" height="120" style="border-radius:50%;" /> | <img src="[https://ui-avatars.com/api/?name=Azka+Assetya&background=random&color=fff&size=200](https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1767585354566.jpeg)" width="120" height="120" style="border-radius:50%;" /> |
 | *Owner + Project Manager* | *Lead Dev + Backend Dev* | *Frontend Dev* | *UI/UX Designer* |
 
 ---
