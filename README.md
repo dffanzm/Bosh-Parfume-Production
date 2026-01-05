@@ -1,1 +1,41 @@
-BOSH PARFUME - Official Mobile Application (Production-Ready)<div align="center">"Where Technology Meets Elegance in Every Scent"</div>👤 Our Dev TeamEmpowering Fragrance Discovery through Engineering Excellence<div align="center">Farhan Munir R.Daffa Najmudin H.Danu Trisna J.Azka Assetya D.<img src="https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766908740843.jpg" width="130" height="130" style="border-radius:50%; border: 3px solid #61DBFB"/><img src="https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766907769174.jpg" width="130" height="130" style="border-radius:50%; border: 3px solid #61DBFB"/><img src="https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766907256618.jpg" width="130" height="130" style="border-radius:50%; border: 3px solid #61DBFB"/><img src="https://ui-avatars.com/api/?name=Azka+Assetya&background=random&color=fff&size=200" width="130" height="130" style="border-radius:50%; border: 3px solid #61DBFB"/>Owner + Project ManagerLead + Backend DevFrontend DeveloperUI/UX DesignerDecision MakerSystem ArchitectInterface EngineerCreative Visuals  </div>🚀 OverviewBOSH PARFUME adalah solusi mobile mutakhir berbasis React Native yang dirancang untuk mendefinisikan ulang cara pengguna mengeksplorasi wewangian premium. Aplikasi ini tidak hanya berfungsi sebagai katalog digital, namun sebagai asisten cerdas yang menggunakan pendekatan data-driven untuk memandu pengguna menemukan signature scent mereka berdasarkan struktur kimiawi aroma (Fragrance Notes).Dibuat dengan standar performa industri, aplikasi ini mengimplementasikan React Native Reanimated untuk transisi antarmuka yang ultra-mulus (60 FPS) serta sistem Smart Data Caching menggunakan AsyncStorage untuk memastikan persistensi data yang instan di segala kondisi jaringan.✨ Key Features🔍 Smart Scent Finder: Algoritma filtrasi cerdas berbasis Aroma Bubbles. Memungkinkan pengguna melakukan kueri produk berdasarkan preferensi notes seperti Woody, Floral, Citrus, atau Vanilla.💎 Luxury Glassmorphism UI: Implementasi antarmuka modern dengan efek blur transparan (Glassmorphism) yang selaras dengan estetika industri parfum mewah.📱 Adaptive Dynamic Navigation: Sistem navigasi berbasis Expo Router yang dioptimasi dengan logic Context-Aware Motion. Arah animasi transisi menyesuaikan secara otomatis berdasarkan hierarki halaman.💬 Seamless Direct-to-Admin: Jalur transaksi terintegrasi via WhatsApp untuk meningkatkan trust dan conversion rate melalui interaksi langsung.🛠 Tech Stack & ArchitectureFrontend Core: React Native & Expo SDK (New Architecture Enabled)Routing: Expo Router (File-based Routing)Animation: React Native Reanimated 3 & Lottie SDKState Management: React Hooks & Shared ValuesData Persistence: AsyncStorage for High-Speed Local CachingVisual Assets: Lucide Icons & Custom SVG RenderingAPI Layer: REST API Integration with apiService abstraction🏛 System DesignAplikasi ini mengadopsi arsitektur Decoupled System. Frontend mobile terpisah secara total dari backend, berkomunikasi melalui protokol RESTful API. Struktur ini memungkinkan skalabilitas tinggi di mana konten aplikasi dapat diperbarui secara real-time melalui Admin Panel terpisah tanpa perlu melakukan rilis ulang binary ke App Store/Play Store.🔗 Institution ReferenceProyek ini dikembangkan di bawah naungan akademis:UIN Sunan Gunung Djati Bandung: https://uinsgd.ac.id/Jurusan Informatika: http://if.uinsgd.ac.id/📽 Pitch Deck & StrategyAnalisis mendalam mengenai Problem-Solution Fit, Model Bisnis, dan Arsitektur Database dapat diakses melalui tautan berikut:👉 [Link Pitch Deck BOSH PARFUME Di Sini]<div align="center">© 2026 BOSH PARFUME Engineering Team. All Rights Reserved.</div>
+# BOSH PARFUME - Official Mobile Application (Production-Ready)
+
+![Build Status](https://img.shields.io/badge/Status-Production-success)
+![Platform](https://img.shields.io/badge/Platform-React%20Native-blue)
+![Architecture](https://img.shields.io/badge/Architecture-Clean%20Code-orange)
+
+## 👤 Our Dev Team
+*Empowering Fragrance Discovery through Technology*
+
+| [Farhan Munir Rohmatullah] | [Daffa Najmudin Hanif] | [Danu Trisna Juwana] | [Azka Asettya Defano] |
+| :---: | :---: | :---: |
+| ![Foto Dev](https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766908740843.jpg) | ![Foto Dev](https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766907769174.jpg) | ![Foto Dev](https://ngjkorwojlytzugxkhih.supabase.co/storage/v1/object/public/developers/dev-1766907256618.jpg) | ![Foto Dev](https://ui-avatars.com/api/?name=Azka+Assetya&background=random&color=fff&size=200) |
+| **Owner + Project Manager** | **Lead Dev + Backend Dev** | **Frontend Dev** |  **UI/UX Designer** |
+
+---
+
+## 🚀 Overview
+**BOSH PARFUME** adalah aplikasi mobile berbasis React Native yang dirancang untuk merevolusi pengalaman belanja parfum melalui pendekatan *data-driven*. Aplikasi ini tidak hanya berfungsi sebagai katalog, tetapi sebagai asisten cerdas yang memandu pengguna menemukan *signature scent* mereka berdasarkan struktur *Fragrance Notes*.
+
+Dibuat dengan optimasi performa tinggi menggunakan **React Native Reanimated** untuk transisi 60 FPS dan sistem **Local Caching** guna memastikan akses data yang instan dan hemat kuota.
+
+## ✨ Key Features
+- **Smart Scent Finder:** Algoritma filter berbasis aroma (*Woody, Floral, Citrus*) untuk mencocokkan karakter pengguna.
+- **Glassmorphism Interface:** UI modern yang memberikan kesan mewah dan premium.
+- **Fluid Navigation:** Implementasi Expo Router dengan optimasi arah geser (*linear direction*) yang intuitif.
+- **Seamless WhatsApp Integration:** Jalur transaksi *Direct-to-Human* untuk tingkat konversi yang lebih tinggi.
+
+## 🛠 Tech Stack
+- **Framework:** React Native (Expo)
+- **State Management:** React Hooks
+- **Animation:** React Native Reanimated & Lottie
+- **Styling:** StyleSheet & Lucide Icons
+- **Storage:** AsyncStorage for Local Caching
+
+## 🔗 Institution Reference
+- **UIN Sunan Gunung Djati Bandung:** [https://uinsgd.ac.id/](https://uinsgd.ac.id/)
+- **Jurusan Informatika:** [http://if.uinsgd.ac.id/](http://if.uinsgd.ac.id/)
+
+## 📽 Pitch Deck
+Pelajari lebih lanjut tentang strategi bisnis dan detail teknis kami di:
+👉 **[Link Pitch Deck BOSH PARFUME Di Sini]**
